@@ -1,31 +1,20 @@
-#include <iostream>
-#include "blockchain.h"
-
-using namespace std;
+#include "application/application.h"
 
 int main(int argc, char *argv[])
 {
-    cout << "hello world\n";
+    if(argc < 5){
+        Util::log_message("Invalid input, you must provide: local addres, local port, remote address, remote port" , Util::LOG_TYPE::ERROR);
+        Util::log_message("./program 127.0.0.1 1300 127.0.0.1 1301" , Util::LOG_TYPE::ERROR);
+        exit(0);
+    }
+    Application app;
 
-    // inicia blockchain
-    Blockchain UFUCoin;
+    string local_address = string(argv[1]);
+    string local_port = string(argv[2]);
+    string remote_address = string(argv[3]);
+    string remote_port = string(argv[4]);
 
-    time_t t1Time;
-    TransactionData primeiraTransacao(1.5, "Fulano", "Ciclano", time(&t1Time));
-
-    UFUCoin.addBlock(primeiraTransacao);
-    cout << "Is chain valid?" << endl
-         << UFUCoin.isChainValid() << endl;
-
-    TransactionData segundaTransacao(12345, "Beltrano", "Ciclano", time(&t1Time));
-
-    UFUCoin.addBlock(segundaTransacao);
-    cout << "Is chain still valid?" << endl
-         << UFUCoin.isChainValid() << endl;
-
-
-    cout << "estado do blockchain:" << endl;
-    UFUCoin.printChain();
+    app.start(local_address, local_port, remote_address, remote_port);
 
     return 0;
 }

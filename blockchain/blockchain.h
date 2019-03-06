@@ -11,14 +11,14 @@ class Blockchain
 public:
     Blockchain();
 
-    void addBlock(TransactionData data);
-    bool isChainValid();
+    void add_block(ChatData data);
+    bool is_chain_valid();
 
-    Block getLatestBlock();
-    void printChain();
+    Block get_latest_block();
+    void print_chain();
 
 private:
-    void createGenesisBlock();
+    void create_genesis_block();
     vector<Block> chain;
 };
 

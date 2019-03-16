@@ -2,6 +2,7 @@
 #define APPLICATION_H
 
 #include <boost/thread/mutex.hpp>
+#include <chrono>
 #include <thread>
 #include <time.h>
 #include <fstream>

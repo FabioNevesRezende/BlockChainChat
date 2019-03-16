@@ -26,6 +26,7 @@ void Application::consume_message_queue()
 {
     while(running)
     {
+        std::this_thread::sleep_for(std::chrono::milliseconds(600));
         if(recv_msg_queue.get_queue_size() > 0){
             ChatData received = recv_msg_queue.consume();
             Util::log_message("msg received on application: " + received.get_chat_msg(), Util::LOG_TYPE::INFO);

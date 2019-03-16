@@ -45,43 +45,14 @@ void ConnectionManager::talk_with_peer(Cnx* cnx)
 {
     while(running && cnx->is_open())
     {
-        try{
-            string sck_msg_string = cnx->read_some();
-            string msg_type = Util::get_msg_type(sck_msg_string);
-            if(msg_type == Util::MSG_REQUEST_NODES)
+        try
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(600));
+            vector<string> sck_read_msgs = cnx->read_some();
+
+            for(string msg: sck_read_msgs)
             {
-                Util::log_message("Received a request_nodes request", Util::LOG_TYPE::INFO);
-            }
-            else if(msg_type == Util::MSG_CNX_DATA)
-            {
-                CnxData data;
-                data.address = local_address;
-                data.port = local_port;
-                cnx->write_msg_on_socket(
-                            Util::MSG_CNX_DATA_RESPONSE + Util::MSG_SEPARATOR +
-                            Util::cnx_data_to_str(data)
-                            );
-            }
-            else if(msg_type == Util::MSG_CNX_DATA_RESPONSE)
-            {
-                cnx->cnx_data = Util::str_to_cnx_data(sck_msg_string);
-            }
-            else if(msg_type == Util::MSG_CHAT_DATA)
-            {
-                try
-                {
-                    ChatData sck_msg = Util::str_to_chat_data(sck_msg_string);
-                    recv_msg_queue.add_msg(sck_msg);
-                }
-                catch(std::exception& e)
-                {
-                    Util::log_message("ConnectionManager::talk_with_peer Received a malformed chat data packet", Util::LOG_TYPE::ERROR);
-                    Util::log_message(e.what(), Util::LOG_TYPE::ERROR);
-                }
-            }
-            else
-            {
-                Util::log_message("Invalid message: " + sck_msg_string, Util::LOG_TYPE::ERROR);
+                process_peer_message(cnx, msg);
             }
         }
         catch(std::exception& e){
@@ -93,6 +64,52 @@ void ConnectionManager::talk_with_peer(Cnx* cnx)
         }
     }
     cnxs.remove(cnx);
+}
+
+void ConnectionManager::process_peer_message(Cnx* cnx, string sck_msg_string)
+{
+    string msg_type = Util::get_msg_type(sck_msg_string);
+    try
+    {
+        if(msg_type == Util::MSG_REQUEST_NODES)
+        {
+            Util::log_message("Received a request_nodes request", Util::LOG_TYPE::INFO);
+        }
+        else if(msg_type == Util::MSG_CNX_DATA)
+        {
+            CnxData data;
+            data.address = local_address;
+            data.port = local_port;
+            cnx->write_msg_on_socket(
+                        Util::MSG_CNX_DATA_RESPONSE + Util::MSG_SEPARATOR +
+                        Util::cnx_data_to_str(data)
+                        );
+        }
+        else if(msg_type == Util::MSG_CNX_DATA_RESPONSE)
+        {
+            cnx->cnx_data = Util::str_to_cnx_data(sck_msg_string);
+        }
+        else if(msg_type == Util::MSG_CHAT_DATA)
+        {
+            try
+            {
+                ChatData sck_msg = Util::str_to_chat_data(sck_msg_string);
+                recv_msg_queue.add_msg(sck_msg);
+            }
+            catch(std::exception& e)
+            {
+                Util::log_message("ConnectionManager::talk_with_peer Received a malformed chat data packet", Util::LOG_TYPE::ERROR);
+                Util::log_message(e.what(), Util::LOG_TYPE::ERROR);
+            }
+        }
+        else
+        {
+            Util::log_message("Invalid message: " + sck_msg_string, Util::LOG_TYPE::ERROR);
+        }
+    }
+    catch(std::exception& e){
+        throw e;
+    }
 }
 
 void ConnectionManager::connect_to_first_node()
@@ -116,6 +133,7 @@ void ConnectionManager::send_msg_to_cnx()
 {
     while(running)
     {
+        std::this_thread::sleep_for(std::chrono::milliseconds(600));
         if(send_msg_queue.get_queue_size() > 0)
         {
             ChatData data = send_msg_queue.consume();

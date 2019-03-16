@@ -36,10 +36,10 @@ bool Cnx::write_msg_on_socket(string msg)
 }
 
 
-std::string Cnx::read_some()
+vector<string> Cnx::read_some()
 {
     size_t len;
-    std::string ret(Util::EMPTY_STRING);
+    vector<string> ret;
     boost::system::error_code error_c;
     boost::array<char, RESP_BUFFER_SIZE> buf;
 
@@ -52,8 +52,12 @@ std::string Cnx::read_some()
 
     if(len > RESP_BUFFER_SIZE) return ret;
 
-    ret = std::string(buf.data());
-    ret.erase(std::remove(ret.begin(), ret.end(), 6), ret.end());
+    string ret_str = std::string(buf.data());
+    ret = Util::split(ret_str, "\r\n");
+    for(string& r: ret)
+    {
+        r.erase(std::remove(r.begin(), r.end(), 6), r.end());
+    }
     buf.fill(0);
 
     return ret;

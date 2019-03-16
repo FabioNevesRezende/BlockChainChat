@@ -8,7 +8,7 @@
 #include "cnx.h"
 #include "../util/messagequeue.h"
 #include "../util/util.h"
-#include "../util/threadsafelist.h"
+//#include "../util/threadsafelist.h"
 
 class ConnectionManager{
 
@@ -37,6 +37,7 @@ private:
     // functions
     void receive_cnx();
     void talk_with_peer(Cnx* cnx);
+    void process_peer_message(Cnx* cnx, string sck_msg_string);
     void connect_to_first_node();
     void send_msg_to_cnx();
     void request_known_nodes(Cnx* client_cnx);

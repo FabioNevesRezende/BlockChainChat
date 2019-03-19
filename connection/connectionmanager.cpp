@@ -3,8 +3,9 @@
 ConnectionManager::ConnectionManager(MessageQueue& recv_msg_queue, MessageQueue& send_msg_queue,
                                      string local_address, string local_port, string remote_address, string remote_port) :
     acceptor(server_io, tcp::endpoint(tcp::v4(), boost::lexical_cast<int>(local_port))),
+    cnxs(cnxs_mutex),
     recv_msg_queue(recv_msg_queue),
-    send_msg_queue(send_msg_queue),
+    send_broadcast_msg_queue(send_msg_queue),
     remote_address(remote_address),
     local_port(local_port),
     remote_port(remote_port),
@@ -47,7 +48,7 @@ void ConnectionManager::talk_with_peer(Cnx* cnx)
     {
         try
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(600));
+            std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_SLEEP_MILISECONDS_TIME));
             vector<string> sck_read_msgs = cnx->read_some();
 
             for(string msg: sck_read_msgs)
@@ -94,7 +95,7 @@ void ConnectionManager::process_peer_message(Cnx* cnx, string sck_msg_string)
             try
             {
                 ChatData sck_msg = Util::str_to_chat_data(sck_msg_string);
-                recv_msg_queue.add_msg(sck_msg);
+                recv_msg_queue.add_msg(Util::MSG_CHAT_DATA + Util::MSG_SEPARATOR + Util::chat_data_to_string(sck_msg));
             }
             catch(std::exception& e)
             {
@@ -129,18 +130,18 @@ void ConnectionManager::connect_to_first_node()
         Util::log_message("Acting as a root node" , Util::LOG_TYPE::INFO);
     }
 }
+
 void ConnectionManager::send_msg_to_cnx()
 {
     while(running)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(600));
-        if(send_msg_queue.get_queue_size() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_SLEEP_MILISECONDS_TIME));
+        if(send_broadcast_msg_queue.get_queue_size() > 0)
         {
-            ChatData data = send_msg_queue.consume();
-            for(Cnx* c: cnxs)
-            {
-                c->write_msg_on_socket(Util::MSG_CHAT_DATA + Util::MSG_SEPARATOR + Util::chat_data_to_string(data));
-            }
+            string msg_to_send = send_broadcast_msg_queue.consume();
+            
+            cnxs.broadcast(msg_to_send);
+            
             Util::log_message("Sent message to " + std::to_string(cnxs.size()) + " connections" , Util::LOG_TYPE::INFO);
 
         }

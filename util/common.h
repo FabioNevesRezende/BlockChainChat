@@ -14,5 +14,6 @@ using namespace std;
 
 #define BLOCK_CHAIN_CHAT_STD_LISTEN_PORT 1300
 #define RESP_BUFFER_SIZE 2048
+#define THREAD_SLEEP_MILISECONDS_TIME 600
 
 #endif // COMMON_H

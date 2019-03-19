@@ -6,8 +6,10 @@
 #include <boost/thread.hpp>
 
 #include "cnx.h"
+#include "connectionlist.h"
 #include "../util/messagequeue.h"
 #include "../util/util.h"
+
 //#include "../util/threadsafelist.h"
 
 class ConnectionManager{
@@ -26,9 +28,10 @@ private:
     Cnx* client_cnx;
     tcp::acceptor acceptor; // boost tcp connection acceptor
     bool running; // is server running
-    std::list<Cnx*> cnxs; // list of active connections
+    ConnectionList cnxs; // list of active connections
+    boost::mutex cnxs_mutex;
     MessageQueue& recv_msg_queue; // list of messages received yet to be processed
-    MessageQueue& send_msg_queue; // list of messages send yet to be processed
+    MessageQueue& send_broadcast_msg_queue; // list of messages send yet to be processed
     string local_address; // address to attempt to make first connection
     string remote_address; // address to attempt to make first connection
     string local_port; // local port to be listening on

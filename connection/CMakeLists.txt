@@ -2,6 +2,8 @@ add_library(
     connection SHARED
     cnx.cpp
     cnx.h
+    connectionlist.cpp
+    connectionlist.h
     connectionmanager.cpp
     connectionmanager.h
 )

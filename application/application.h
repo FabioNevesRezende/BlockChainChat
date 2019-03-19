@@ -12,6 +12,8 @@
 #include "../util/user.h"
 #include "../util/messagequeue.h"
 
+#define LOCAL_INPUT_BUFFER_SIZE 512
+
 class Application
 {
 public:

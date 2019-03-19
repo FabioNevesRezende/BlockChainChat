@@ -4,22 +4,20 @@
 #include <list>
 #include <boost/thread/mutex.hpp>
 
-#include "chatdata.h"
-
 using namespace std;
 
 class MessageQueue
 {
 public:
     MessageQueue(boost::mutex& mu);
-    void add_msg(ChatData m);
+    void add_msg(string m);
     void remove_msg();
     size_t get_queue_size() const;
-    ChatData consume();
+    string consume();
 
 private:
     boost::mutex& mu;
-    list<ChatData> messages;
+    list<string> messages;
 };
 
 #endif // MESSAGEQUEUE_H

@@ -6,7 +6,7 @@ MessageQueue::MessageQueue(boost::mutex &mu):
 
 }
 
-void MessageQueue::add_msg(ChatData m)
+void MessageQueue::add_msg(string m)
 {
     boost::mutex::scoped_lock lock(mu);
     messages.push_back(m);
@@ -24,10 +24,10 @@ size_t MessageQueue::get_queue_size() const
     return messages.size();
 }
 
-ChatData MessageQueue::consume()
+string MessageQueue::consume()
 {
     boost::mutex::scoped_lock lock(mu);
-    ChatData ret = messages.front();
+    string ret = messages.front();
     messages.pop_front();
 
     return ret;

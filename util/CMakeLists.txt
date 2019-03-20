@@ -10,6 +10,8 @@ add_library(
     user.cpp
     util.h
     util.cpp
+    threadsafelist.h
+    threadsafelist.cpp
 
 )
 

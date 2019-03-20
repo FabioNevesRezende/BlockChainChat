@@ -8,5 +8,5 @@ add_library(
     connectionmanager.h
 )
 
-target_link_libraries(util PRIVATE connection)
+target_link_libraries(connection PUBLIC util)
 target_include_directories(connection PUBLIC '${CMAKE_CURRENT_SOURCE_DIR}')

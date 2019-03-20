@@ -3,7 +3,6 @@
 ConnectionManager::ConnectionManager(MessageQueue& recv_msg_queue, MessageQueue& send_msg_queue,
                                      string local_address, string local_port, string remote_address, string remote_port) :
     acceptor(server_io, tcp::endpoint(tcp::v4(), boost::lexical_cast<int>(local_port))),
-    cnxs(cnxs_mutex),
     recv_msg_queue(recv_msg_queue),
     send_broadcast_msg_queue(send_msg_queue),
     remote_address(remote_address),
@@ -12,6 +11,7 @@ ConnectionManager::ConnectionManager(MessageQueue& recv_msg_queue, MessageQueue&
     local_address(local_address)
 {
     running = true;
+
 }
 
 ConnectionManager::~ConnectionManager()
@@ -140,9 +140,12 @@ void ConnectionManager::send_msg_to_cnx()
         {
             string msg_to_send = send_broadcast_msg_queue.consume();
             
-            cnxs.broadcast(msg_to_send);
-            
-            Util::log_message("Sent message to " + std::to_string(cnxs.size()) + " connections" , Util::LOG_TYPE::INFO);
+            //cnxs.broadcast(msg_to_send);
+
+            cnxs.for_each(
+                [msg_to_send](Cnx* c){ c->write_msg_on_socket(msg_to_send); }
+            );
+                        Util::log_message("Sent message to " + std::to_string(cnxs.size()) + " connections" , Util::LOG_TYPE::INFO);
 
         }
     }

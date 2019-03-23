@@ -11,7 +11,6 @@ add_library(
     util.h
     util.cpp
     threadsafelist.h
-    threadsafelist.cpp
 
 )
 

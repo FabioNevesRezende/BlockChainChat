@@ -22,7 +22,7 @@ public:
     void start(string local_address, string local_port, string ip_target, string remote_port);
 
 private:
-    ConnectionManager* cm;
+    unique_ptr<ConnectionManager> cm;
     Blockchain chatBlocks;
     User logged_user;
     MessageQueue recv_msg_queue;

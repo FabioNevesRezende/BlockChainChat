@@ -8,6 +8,7 @@
 #include "../util/cnxdata.h"
 #include "../util/common.h"
 #include "../util/util.h"
+#include <memory>
 
 class Cnx
 {
@@ -29,5 +30,7 @@ private:
     tcp::resolver* resolver;
     int id;
 };
+
+typedef std::shared_ptr<Cnx> CnxPtr;
 
 #endif // CNX_H

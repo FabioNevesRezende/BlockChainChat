@@ -10,12 +10,11 @@ Application::Application() :
 
 Application::~Application()
 {
-    if(cm)
-        delete cm;
+
 }
 void Application::start(string local_address, string local_port, string ip_target, string remote_port)
 {
-    cm = new ConnectionManager(recv_msg_queue, send_msg_queue, local_address, local_port, ip_target, remote_port);
+    cm = make_unique<ConnectionManager>(recv_msg_queue, send_msg_queue, local_address, local_port, ip_target, remote_port);
     thread(&Application::consume_message_queue, this).detach();
     thread(&Application::input_local, this).detach();
     cm->listen();

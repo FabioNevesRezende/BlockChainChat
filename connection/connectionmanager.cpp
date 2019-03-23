@@ -16,8 +16,6 @@ ConnectionManager::ConnectionManager(MessageQueue& recv_msg_queue, MessageQueue&
 
 ConnectionManager::~ConnectionManager()
 {
-    if(client_cnx)
-        delete client_cnx;
 }
 
 void ConnectionManager::listen()
@@ -34,7 +32,7 @@ void ConnectionManager::receive_cnx()
 {
     while(running)
     {
-        Cnx* c = new Cnx(std::ref(server_io));
+        CnxPtr c(new Cnx(std::ref(server_io)));
         acceptor.accept(c->get_socket());
         cnxs.push_back(c);
         request_cnx_data(c);
@@ -42,7 +40,7 @@ void ConnectionManager::receive_cnx()
     }
 }
 
-void ConnectionManager::talk_with_peer(Cnx* cnx)
+void ConnectionManager::talk_with_peer(CnxPtr cnx)
 {
     while(running && cnx->is_open())
     {
@@ -67,7 +65,7 @@ void ConnectionManager::talk_with_peer(Cnx* cnx)
     cnxs.remove(cnx);
 }
 
-void ConnectionManager::process_peer_message(Cnx* cnx, string sck_msg_string)
+void ConnectionManager::process_peer_message(CnxPtr cnx, string sck_msg_string)
 {
     string msg_type = Util::get_msg_type(sck_msg_string);
     try
@@ -115,7 +113,7 @@ void ConnectionManager::process_peer_message(Cnx* cnx, string sck_msg_string)
 
 void ConnectionManager::connect_to_first_node()
 {
-    client_cnx = new Cnx(std::ref(client_io));
+    client_cnx = make_shared<Cnx>(std::ref(client_io));
     if(client_cnx->connect_to_target(remote_address, remote_port))
     {
         Util::log_message("Connected to " + remote_address + " at port: " + remote_port, Util::LOG_TYPE::INFO);
@@ -140,10 +138,8 @@ void ConnectionManager::send_msg_to_cnx()
         {
             string msg_to_send = send_broadcast_msg_queue.consume();
             
-            //cnxs.broadcast(msg_to_send);
-
             cnxs.for_each(
-                [msg_to_send](Cnx* c){ c->write_msg_on_socket(msg_to_send); }
+                [msg_to_send](CnxPtr c){ c->write_msg_on_socket(msg_to_send); }
             );
                         Util::log_message("Sent message to " + std::to_string(cnxs.size()) + " connections" , Util::LOG_TYPE::INFO);
 
@@ -151,12 +147,12 @@ void ConnectionManager::send_msg_to_cnx()
     }
 }
 
-void ConnectionManager::request_known_nodes(Cnx* client_cnx)
+void ConnectionManager::request_known_nodes(CnxPtr client_cnx)
 {
     client_cnx->write_msg_on_socket(Util::MSG_REQUEST_NODES);
 }
 
-void ConnectionManager::request_cnx_data(Cnx* c)
+void ConnectionManager::request_cnx_data(CnxPtr c)
 {
     c->write_msg_on_socket(Util::MSG_CNX_DATA);
 }
